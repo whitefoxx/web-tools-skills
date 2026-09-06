@@ -50,3 +50,7 @@ one call, not a rebuild.
   YouTube video, pot-free, by driving the "Show transcript" panel and reading the
   DOM. Verified on five videos (24 → 1106 rows). More robust than a private-API
   adapter, which YouTube's `pot` wall now breaks.
+- [`bilibili-subtitle/`](./bilibili-subtitle/) — a Bilibili video's subtitle
+  track (CC or AI-generated) as timestamped lines. Pure HTTP: three `fetch_url`
+  calls (`view` → `wbi/v2` → the subtitle body), no tab, the `wbi` field works
+  unsigned. Verified on the Rick Astley MV (47 lines).
