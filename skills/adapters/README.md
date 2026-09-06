@@ -1,31 +1,24 @@
-# Adapter skills
+# Reaching a site — build your own, we keep the base sharp
 
-An **adapter skill** is the durable form of "a way to reach site X" — a
-`SKILL.md` (the knowledge: which route works and why) plus an executable core (a
-fenced `eval_js` snippet, portable to any of the web-tools shells). It replaces
-the old per-site adapter *marketplace*: capability the agent builds from generic
-primitives and keeps as data you own, never shipped extension code.
+This project does **not** ship or maintain per-site extractors. Sites change
+constantly; a catalog of site skills is a maintenance nightmare and the wrong
+place to spend effort. What is maintained is the **base**: the generic browser
+tools plus `eval_js` and the recon primitives (`find_structured_data` /
+`get_a11y_tree` / `find_in_dom`), kept sharp enough that an agent works out any
+site's specifics **live** — and a small number of hints for the couple of sites
+where the obvious route actively fails.
 
-These are **consumer-agnostic**: the same skill works whether it is driven by a
-CLI agent over WebCLI or by the localmd app over localmd Connect — both shells
-expose the same `eval_js` primitive.
+So "a way to reach site X" is not something you install from here. It is
+something your agent **builds once with the ladder below and you save into your
+own skills directory** — data you own, portable across shells (both WebCLI and
+localmd Connect expose the same `eval_js`). When the site changes, your agent
+re-derives it from the same ladder. No shipped extension code, no upstream
+catalog to fall out of date.
 
-## Install one
+## Build one — the robustness ladder
 
-```bash
-# a CLI agent (WebCLI): install globally
-npx skills add whitefoxx/web-tools-skills -g
-
-# localmd: install into your knowledge base's .agents/skills/
-```
-
-Or hand the repo URL to your agent and let it read the skill it needs.
-
-## Build your own — the robustness ladder
-
-Most sites need no pre-written skill: with `eval_js` and the ladder below, an
-agent one-shots the extraction live and saves it as a skill. Stop at the first
-rung that works:
+Most sites need no pre-written recipe: with `eval_js` and the ladder below an
+agent one-shots the extraction live. Stop at the first rung that works:
 
 1. **The site's own JSON API** — `fetch(api, {credentials:'include'})` from
    inside the page. Zero selectors, most durable.
@@ -34,43 +27,21 @@ rung that works:
 3. **The site's OWN UI as the data source**, when a private API is locked behind
    a token / signature / pot — drive the panel or list a person clicks and read
    the DOM. (A YouTube transcript comes from its "Show transcript" panel, not the
-   pot-locked caption API — see `youtube-transcript/`.)
+   pot-locked caption API.)
 4. **Last resort: scrape the DOM** with STABLE selectors (`data-testid` / `aria` /
    semantic tags / `href`), never random build-hash classes. `get_a11y_tree` and
    `find_in_dom` help pick anchors.
 
 Rules of thumb: **reduce to rows inside the page** — `eval_js` returns the data
 you need, not the whole payload. A read that must POST (GraphQL / InnerTube)
-needs `allow_write:true`. When it works, save it here as a skill so next time is
-one call, not a rebuild.
+needs `allow_write:true`. When it works, **save it as a skill in your own skills
+directory** so next time is one call, not a rebuild — and so you, not an
+upstream maintainer, own keeping it current.
 
-## The skills
+## Keeping the base honest
 
-- [`youtube-transcript/`](./youtube-transcript/) — the full transcript of any
-  YouTube video, pot-free, by driving the "Show transcript" panel and reading the
-  DOM. Verified on five videos (24 → 1106 rows). More robust than a private-API
-  adapter, which YouTube's `pot` wall now breaks.
-- [`bilibili-subtitle/`](./bilibili-subtitle/) — a Bilibili video's subtitle
-  track (CC or AI-generated) as timestamped lines. Pure HTTP: three `fetch_url`
-  calls (`view` → `wbi/v2` → the subtitle body), no tab, the `wbi` field works
-  unsigned. Verified on the Rick Astley MV (47 lines).
-- [`claude-conversations/`](./claude-conversations/) — list + read the user's own
-  Claude.ai chats (titles + full transcripts) to import into a KB. Cookie-only
-  `fetch_url`, no token. Verified (3 conversations, one read back, 8 messages).
-- [`chatgpt-conversations/`](./chatgpt-conversations/) — the same for ChatGPT
-  (`api/auth/session` token → `backend-api`; the token is a credential, header
-  only). Verified (3 conversations, one read back, 12 messages).
-- [`gemini-conversations/`](./gemini-conversations/) — the same for Google Gemini,
-  DOM-driven (no read API): an active tab + `eval_js` over `user-query` /
-  `model-response`. Verified (5 recents, one read back).
-- [`zhihu/`](./zhihu/) — search 知乎 and read answers/articles as clean text with
-  author + vote counts. Cookie-authed `api/v4`; articles read as Markdown (the
-  article API 403s). Verified (search → answer, 177 votes, 992 chars).
-- [`reddit/`](./reddit/) — read a thread (post + comment tree), search, or list a
-  subreddit. Append `.json` to any page, `raw_json=1`, cookie-authed. Verified
-  (a thread → post + comments; search → results).
-- [`x-twitter/`](./x-twitter/) — read an X thread/tweet or the user's bookmarks.
-  Two steps: fetch current GraphQL query ids from a maintained config, then
-  request from an x.com tab via `eval_js` (`ct0` + the public bearer), reduced to
-  rows in the page. The most fragile one (X rotates ids/flags). Verified
-  (bookmarks → 7, a thread → 30 tweets).
+The project runs a curated set of these tasks against common sites periodically —
+not to ship the recipes, but to check the base is still good enough to derive
+them. A probe breaking because a site changed is expected and not a bug; a probe
+breaking because a base primitive can no longer express the route is a gap worth
+fixing in the base.
