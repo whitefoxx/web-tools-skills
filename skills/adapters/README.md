@@ -54,3 +54,9 @@ one call, not a rebuild.
   track (CC or AI-generated) as timestamped lines. Pure HTTP: three `fetch_url`
   calls (`view` → `wbi/v2` → the subtitle body), no tab, the `wbi` field works
   unsigned. Verified on the Rick Astley MV (47 lines).
+- [`claude-conversations/`](./claude-conversations/) — list + read the user's own
+  Claude.ai chats (titles + full transcripts) to import into a KB. Cookie-only
+  `fetch_url`, no token. Verified (3 conversations, one read back, 8 messages).
+- [`chatgpt-conversations/`](./chatgpt-conversations/) — the same for ChatGPT
+  (`api/auth/session` token → `backend-api`; the token is a credential, header
+  only). Verified (3 conversations, one read back, 12 messages).
