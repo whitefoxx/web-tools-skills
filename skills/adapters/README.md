@@ -66,3 +66,11 @@ one call, not a rebuild.
 - [`zhihu/`](./zhihu/) — search 知乎 and read answers/articles as clean text with
   author + vote counts. Cookie-authed `api/v4`; articles read as Markdown (the
   article API 403s). Verified (search → answer, 177 votes, 992 chars).
+- [`reddit/`](./reddit/) — read a thread (post + comment tree), search, or list a
+  subreddit. Append `.json` to any page, `raw_json=1`, cookie-authed. Verified
+  (a thread → post + comments; search → results).
+- [`x-twitter/`](./x-twitter/) — read an X thread/tweet or the user's bookmarks.
+  Two steps: fetch current GraphQL query ids from a maintained config, then
+  request from an x.com tab via `eval_js` (`ct0` + the public bearer), reduced to
+  rows in the page. The most fragile one (X rotates ids/flags). Verified
+  (bookmarks → 7, a thread → 30 tweets).
