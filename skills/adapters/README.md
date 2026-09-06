@@ -60,3 +60,9 @@ one call, not a rebuild.
 - [`chatgpt-conversations/`](./chatgpt-conversations/) — the same for ChatGPT
   (`api/auth/session` token → `backend-api`; the token is a credential, header
   only). Verified (3 conversations, one read back, 12 messages).
+- [`gemini-conversations/`](./gemini-conversations/) — the same for Google Gemini,
+  DOM-driven (no read API): an active tab + `eval_js` over `user-query` /
+  `model-response`. Verified (5 recents, one read back).
+- [`zhihu/`](./zhihu/) — search 知乎 and read answers/articles as clean text with
+  author + vote counts. Cookie-authed `api/v4`; articles read as Markdown (the
+  article API 403s). Verified (search → answer, 177 votes, 992 chars).
