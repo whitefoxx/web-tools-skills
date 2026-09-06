@@ -1,43 +1,58 @@
-# webcli-skills
+# web-tools-skills
 
-Bridge daemon + agent skill for **WebCLI** — a headless, agent-free Chrome
-extension that exposes your logged-in browser's **generic browser tools** (open
-pages, read/extract, click/type/scroll, screenshot, manage tabs) to external AI
-agents (Claude Code, Codex, …). No site adapters, no in-browser LLM — just the
-primitives, driven over plain HTTP.
+The public skills + bridge daemon for **web-tools** — the shared, open base that
+powers two Chrome extensions:
 
-It's the "pure provider" sibling of the full [Web Agent](https://github.com/whitefoxx/web-agent-skills)
-extension: same transport, generic tools only.
+- **WebCLI** — headless, agent-free. Exposes your logged-in browser's primitive
+  base (generic browser tools + `eval_js` + recon + site scripts) to external AI
+  agents (Claude Code, Codex, …) over a local bridge you talk to with `curl`.
+- **localmd Connect** — the same primitive base plus knowledge-base features, for
+  the [localmd](https://localmd.app) app.
 
-## Install the skill (one command)
+Both speak the same primitives, so the **adapter skills** here work with either.
 
-```bash
-npx skills add whitefoxx/webcli-skills -g
+## What's in here
+
+```
+server.mjs                     the bridge daemon (npx/node entry, web-tools-bridge bin)
+skills/
+  webcli/SKILL.md              driving guide: how a CLI agent drives WebCLI
+  adapters/                    adapter skills — "a way to reach site X", as data
+    README.md                  what they are + the robustness ladder for building one
+    youtube-transcript/        e.g. a YouTube transcript, pot-free, via the UI panel
 ```
 
-(auto-detects Claude Code / Cursor / Codex …; reads `skills/webcli/SKILL.md`.)
-Or just hand this repo URL to your AI and let it read the skill.
-
-## Run the bridge
+## Install the skills
 
 ```bash
-npx -y github:whitefoxx/webcli-skills        # daemon on 127.0.0.1:9376
-# custom port:  BRIDGE_PORT=8790 npx -y github:whitefoxx/webcli-skills
+# a CLI agent (WebCLI): install globally (auto-detects Claude Code / Cursor / Codex)
+npx skills add whitefoxx/web-tools-skills -g
+
+# localmd: install the adapter skills you want into your KB's .agents/skills/
 ```
 
-The WebCLI extension dials the daemon automatically (default port **9376**, a
-distinct port from the full Web Agent bridge's 8787 so both can run at once).
+Or just hand this repo URL to your agent and let it read the skill it needs.
+
+## Run the bridge (WebCLI)
+
+```bash
+npx -y github:whitefoxx/web-tools-skills          # daemon on 127.0.0.1:9376
+# custom port:  BRIDGE_PORT=8790 npx -y github:whitefoxx/web-tools-skills
+```
+
+The WebCLI extension dials the daemon automatically (default port **9376**).
 
 ## Drive it
 
 ```bash
 curl -s http://127.0.0.1:9376/status                       # is the extension connected?
-curl -s http://127.0.0.1:9376/tools                        # the generic tool catalog (source of truth)
+curl -s http://127.0.0.1:9376/tools                        # the tool catalog (source of truth)
 curl -s http://127.0.0.1:9376/command \
   -d '{"tool":"generic__open_url","args":{"url":"https://example.com"}}'
 ```
 
-Full driving guide: [`skills/webcli/SKILL.md`](./skills/webcli/SKILL.md).
+Full driving guide: [`skills/webcli/SKILL.md`](./skills/webcli/SKILL.md). Building
+an adapter skill: [`skills/adapters/README.md`](./skills/adapters/README.md).
 
 ## HTTP API (binds 127.0.0.1 only)
 
@@ -45,20 +60,13 @@ Full driving guide: [`skills/webcli/SKILL.md`](./skills/webcli/SKILL.md).
 | --------------- | ----------------------------------------------------------- |
 | `GET /ping`     | `{ok:true}`                                                 |
 | `GET /status`   | `{ok, connected, port, client, tools}`                      |
-| `GET /tools`    | `{ok, tools:[…]}` — generic tools in OpenAI-tool shape      |
+| `GET /tools`    | `{ok, tools:[…]}` — tools in OpenAI-tool shape              |
 | `POST /command` | body `{tool, args}` → `{ok, result}` or `{ok:false, error}` |
 
-That daemon is the whole surface **from 0.3.0 on**. 0.2.0 also shipped a second
-path — a postMessage relay letting a **web page** call the tools from an origin
-the user allowlisted — and 0.3.0 removes it: WebCLI is the bridge for CLI
-agents, and browser-page access moved to a dedicated companion extension built
-for the one web app that used it.
+## History
 
-If you are on 0.2.0 and relying on that path, it stops working when you update.
-Your configured origin list is cleared on update, so rolling back does not
-restore it.
-
-## Layout
-
-- `server.mjs` — the bridge daemon (`npx`/`node` entry, `webcli-bridge` bin).
-- `skills/webcli/SKILL.md` — the drop-in agent skill.
+Renamed from `webcli-skills` (2026-09): the base grew beyond WebCLI's generic
+tools into the shared **web-tools** primitive base (eval_js + recon + site
+scripts), and adapter skills replace the old per-site marketplace. The full
+Web Agent extension's own external-control daemon still lives in
+[`web-agent-skills`](https://github.com/whitefoxx/web-agent-skills) for now.

@@ -1,10 +1,10 @@
 {
-  "name": "webcli-skills",
+  "name": "web-tools-skills",
   "version": "0.1.0",
-  "description": "WebCLI — drive your logged-in Chrome's generic browser tools from any external AI agent (Claude Code, Codex, localmd). Bridge daemon + agent skill.",
+  "description": "web-tools \u2014 drive your logged-in Chrome from any external AI agent (Claude Code, Codex, localmd) via WebCLI or localmd Connect. Shared transport daemon + agent skills (driving guides + adapter skills).",
   "type": "module",
   "bin": {
-    "webcli-bridge": "server.mjs"
+    "web-tools-bridge": "server.mjs"
   },
   "scripts": {
     "start": "node server.mjs"
